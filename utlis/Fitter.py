@@ -113,15 +113,10 @@ class Fitter:
             labels = [target['labels'].to(self.device).float() for target in targets]
 
             self.optimizer.zero_grad()
-            # 前向传播计算 loss
             loss, _, _ = self.model(images, boxes, labels)
-            # 反向传播计算 grad
             loss.backward()
-            # 更新 loss
             summary_loss.update(loss.detach().item(), batch_size)
-            # 根据优化算法更新 parameter
             self.optimizer.step()
-            # 执行学习策略
             if self.config.step_scheduler:
                 self.scheduler.step()
 
