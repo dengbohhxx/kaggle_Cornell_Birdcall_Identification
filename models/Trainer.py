@@ -1,10 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Tue Aug 25 00:28:28 2020
 
-@author: dengbo
-"""
 ###Trainer.py
 """
 class Trainer(nn.module):
