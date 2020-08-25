@@ -5,7 +5,6 @@ import datetime
 import time
 from AverageMeter import AverageMeter
 class Fitter:
-    # 初始化
     def __init__(self, model, device, config):
        
         self.config = config
@@ -37,7 +36,6 @@ class Fitter:
         self.scheduler = config.SchedulerClass(self.optimizer, **config.scheduler_params)
         self.log(f'Fitter prepared. Device is {self.device}')
     
-    # 模型训练
     def fit(self, train_loader, validation_loader):
 
         for e in range(self.config.n_epochs):
