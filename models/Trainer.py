@@ -13,3 +13,12 @@ class Trainer(nn.module):
         loss=self.loss(predict,self.labels)
         return loss           
 """
+import torch.nn as nn
+class trainer(nn.Module):
+    def __init__(self,model,loss_F):
+        super().__init__()
+        self.model=model
+        self.loss_F=loss_F
+    def forward(self,x,label):
+        inputs=self.model(x)
+        return self.loss(inputs,label)
