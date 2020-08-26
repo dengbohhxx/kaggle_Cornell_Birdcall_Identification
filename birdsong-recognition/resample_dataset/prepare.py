@@ -10,7 +10,7 @@ from joblib import delayed, Parallel
 
 
 def resample(df: pd.DataFrame, target_sr: int):
-    audio_dir = Path("train_audio")
+    audio_dir = Path("../train_audio")
     resample_dir = Path("train_audio_resampled")
     resample_dir.mkdir(exist_ok=True, parents=True)
     warnings.simplefilter("ignore")
@@ -36,14 +36,18 @@ def resample(df: pd.DataFrame, target_sr: int):
 
 
 if __name__ == "__main__":
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument("--sr", default=22050, type=int)
     parser.add_argument("--n_splits", default=12, type=int)
     args = parser.parse_args()
-
+    """
+    class args:
+        sr=32000
+        n_splits=20
     target_sr = args.sr
 
-    train = pd.read_csv("train.csv")
+    train = pd.read_csv("../train.csv")
     dfs = []
     for i in range(args.n_splits):
         if i == args.n_splits - 1:
