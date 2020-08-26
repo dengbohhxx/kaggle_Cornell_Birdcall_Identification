@@ -8,7 +8,7 @@ class Fitter:
     def __init__(self, model, device, config):       
         self.config = config      
         self.epoch = 0  
-        self.base_dir = f'./{config.folder}'
+        self.base_dir = f'./{config.fo:gitlder}'
         if not os.path.exists(self.base_dir):
             os.makedirs(self.base_dir)         
         self.log_path = f'{self.base_dir}/log.txt'
