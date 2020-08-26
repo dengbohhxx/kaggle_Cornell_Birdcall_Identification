@@ -23,11 +23,10 @@ class TrainGlobalConfig:
     # -------------------
 
     # --------------------
-    # 我们只在每次 epoch 完，验证完后，再执行学习策略。
+
     step_scheduler = False  # do scheduler.step after optimizer.step
     validation_scheduler = True  # do scheduler.step after validation stage loss
 
-    # 当指标变化小时，减少学习率
     SchedulerClass = torch.optim.lr_scheduler.ReduceLROnPlateau
     scheduler_params = dict(
         mode='min',
