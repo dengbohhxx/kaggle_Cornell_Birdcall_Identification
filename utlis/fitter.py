@@ -4,6 +4,7 @@ import torch
 import datetime
 import time
 from utlis.averagemeter import AverageMeter
+from torch.utils.tensorboard import SummaryWriter
 class Fitter:
     def __init__(self, model, device, config):       
         self.config = config      
@@ -16,15 +17,16 @@ class Fitter:
         self.model = model
         self.device = device        
         param_optimizer = list(self.model.named_parameters())
-        no_decay = ['bias', 'LayerNorm.bias', 'LayerNorm.weight']
+        no_decay = ['bias', 'bn', 'logmel_extractor','spectrogram_extractor']
         optimizer_grouped_parameters = [
             {'params': [p for n, p in param_optimizer if not any(nd in n for nd in no_decay)], 'weight_decay': 0.001},
             {'params': [p for n, p in param_optimizer if any(nd in n for nd in no_decay)], 'weight_decay': 0.0}
         ]
-        self.optimizer = torch.optim.RMSprop(self.model.parameters(), lr=config.lr)
+        self.optimizer = torch.optim.RMSprop(optimizer_grouped_parameters, lr=config.lr)
         self.scheduler =config.SchedulerClass(self.optimizer, **config.scheduler_params)
         self.log(f'Fitter prepared. Device is {self.device}')
-    
+        self.writer=SummaryWriter('output/tensorboard')
+        
     def fit(self, train_loader, validation_loader):
         if self.config.verbose:
             lr = self.optimizer.param_groups[0]['lr']
@@ -63,8 +65,9 @@ class Fitter:
                 batch_size=self.config.batch_size
                 waveform=torch.tensor(waveform).to(self.device).float()
                 labels=torch.tensor(labels).to(self.device).float()
-                loss= self.model(waveform,labels)
-                summary_loss.update(loss.detach().item(), batch_size)
+                loss_v= self.model(waveform,labels)
+                self.writer.add_scalar('VAL_LOSS', loss_v)
+                summary_loss.update(loss_v.detach().item(), batch_size)
 
         return summary_loss
 
@@ -79,14 +82,17 @@ class Fitter:
                         f'Train Step {step}/{len(train_loader)}, ' + \
                         f'summary_loss: {summary_loss.avg:.5f}, ' + \
                         f'time: {(time.time() - t):.5f}', end='\r'
-                    )
+                    )   
             batch_size=self.config.batch_size
             self.optimizer.zero_grad()
             labels=torch.tensor(labels).to(self.device).float()
             waveform=torch.tensor(waveform).to(self.device).float()
-            loss = self.model(waveform,labels)
-            loss.backward()
-            summary_loss.update(loss.detach().item(), batch_size)
+            loss_t = self.model(waveform,labels)
+            if step+self.epoch==1:
+                self.writer.add_graph(self.model,(waveform,labels))
+            self.writer.add_scalar('TRAIN_LOSS',loss_t)
+            loss_t.backward()
+            summary_loss.update(loss_t.detach().item(), batch_size)
             self.optimizer.step()
             if self.config.step_scheduler:
                 self.scheduler.step()
