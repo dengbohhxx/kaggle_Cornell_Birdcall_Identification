@@ -21,4 +21,4 @@ class trainer(nn.Module):
         self.loss_F=loss_F
     def forward(self,x,label):
         inputs=self.model(x)
-        return self.loss(inputs,label)
+        return self.loss_F(inputs,label)
