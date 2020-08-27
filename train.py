@@ -5,14 +5,9 @@ import sys
 if not sys.warnoptions:
     import warnings
     warnings.simplefilter("ignore")
-import cv2
-import audioread
-
 import os
 import random
 
-import librosa
-import librosa.display as display
 import numpy as np
 import pandas as pd
 import torch
@@ -55,8 +50,8 @@ train_mp3_path_exist = pd.DataFrame(tmp_list, columns=["ebird_code", "filename",
 del tmp_list
 train_all = pd.merge(
     train_data, train_mp3_path_exist, on=["ebird_code", "filename"], how="inner")
-train_all.loc[:, 'fold'] = 0
-skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=1024)
+train_all.loc[:, 'fold'] = -1
+skf = StratifiedKFold(n_splits=TrainGlobalConfig.k_fold, shuffle=True, random_state=1024)
 for fold_number, (train_index, val_index) in enumerate(skf.split(train_all, train_all["ebird_code"])):
     train_all.loc[train_all.iloc[val_index].index, 'fold'] = fold_number
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -76,13 +71,12 @@ device = torch.device(TrainGlobalConfig.device)
 net.to(device)
 fitter = Fitter(model=net, device=device, config=TrainGlobalConfig)
 for i in range(TrainGlobalConfig.n_epochs):    
-    fold_number = i%5
+    fold_number = i%TrainGlobalConfig.k_fold
     train_dataset = Ori_Mp3_Dataset(
         sounds_id=train_all[train_all['fold'] != fold_number].index.values,
         train_all=train_all,
         waveform_transforms=None,
     )
-
     validation_dataset = Ori_Mp3_Dataset(
         sounds_id=train_all[train_all['fold'] == fold_number].index.values,
         train_all=train_all,
