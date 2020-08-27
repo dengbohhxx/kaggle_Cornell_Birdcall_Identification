@@ -10,23 +10,16 @@ model_config = {
     "classes_num": 264
 }
 class TrainGlobalConfig:
+    device='cpu'
     num_workers = 2
     batch_size = 2
     n_epochs = 40  # n_epochs = 40
     lr = 0.0004
-
-    folder = 'log'
-
-    # -------------------
+    folder = 'output'
     verbose = True
     verbose_step = 1
-    # -------------------
-
-    # --------------------
-
     step_scheduler = False  # do scheduler.step after optimizer.step
     validation_scheduler = True  # do scheduler.step after validation stage loss
-
     SchedulerClass = torch.optim.lr_scheduler.ReduceLROnPlateau
     scheduler_params = dict(
         mode='min',
