@@ -1,1 +1,1 @@
-tensorboard folder
+log trained_weight tensorboard
