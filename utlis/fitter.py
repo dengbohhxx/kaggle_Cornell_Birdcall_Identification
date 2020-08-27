@@ -8,7 +8,7 @@ class Fitter:
     def __init__(self, model, device, config):       
         self.config = config      
         self.epoch = 0  
-        self.base_dir = f'./{config.fo:gitlder}'
+        self.base_dir = f'./{config.folder}'
         if not os.path.exists(self.base_dir):
             os.makedirs(self.base_dir)         
         self.log_path = f'{self.base_dir}/log.txt'
@@ -61,7 +61,9 @@ class Fitter:
                     )
             with torch.no_grad(): 
                 batch_size=self.config.batch_size
-                loss, _, _ = self.model(waveform,labels)
+                waveform=torch.tensor(waveform).to(self.device).float()
+                labels=torch.tensor(labels).to(self.device).float()
+                loss= self.model(waveform,labels)
                 summary_loss.update(loss.detach().item(), batch_size)
 
         return summary_loss
@@ -80,7 +82,9 @@ class Fitter:
                     )
             batch_size=self.config.batch_size
             self.optimizer.zero_grad()
-            loss, _, _ = self.model(waveform,labels)
+            labels=torch.tensor(labels).to(self.device).float()
+            waveform=torch.tensor(waveform).to(self.device).float()
+            loss = self.model(waveform,labels)
             loss.backward()
             summary_loss.update(loss.detach().item(), batch_size)
             self.optimizer.step()
