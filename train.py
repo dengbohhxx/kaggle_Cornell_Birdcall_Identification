@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+import sys
 
+if not sys.warnoptions:
+    import warnings
+    warnings.simplefilter("ignore")
 import cv2
 import audioread
 
@@ -68,7 +72,7 @@ net=trainer(model,PANNsLoss())
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 def collate_fn(batch):
     return tuple(zip(*batch))
-device = torch.device('cpu')
+device = torch.device(TrainGlobalConfig.device)
 net.to(device)
 fitter = Fitter(model=net, device=device, config=TrainGlobalConfig)
 for i in range(TrainGlobalConfig.n_epochs):    
