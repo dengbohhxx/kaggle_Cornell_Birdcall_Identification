@@ -17,10 +17,12 @@ class Fitter:
         self.model = model
         self.device = device        
         param_optimizer = list(self.model.named_parameters())
-        no_decay = ['bias', 'bn', 'logmel_extractor','spectrogram_extractor']
+        no_decay = ['bias', 'bn']
+        no_lr_no_decay=['logmel_extractor','spectrogram_extractor']
         optimizer_grouped_parameters = [
-            {'params': [p for n, p in param_optimizer if not any(nd in n for nd in no_decay)], 'weight_decay': 0.001},
-            {'params': [p for n, p in param_optimizer if any(nd in n for nd in no_decay)], 'weight_decay': 0.0}
+            {'params': [p for n, p in param_optimizer if any(nd in n for nd in no_lr_no_decay)], 'weight_decay': 0.0,'lr':0.0},
+            {'params': [p for n, p in param_optimizer if not any(nd in n for nd in no_lr_no_decay) and any(nd in n for nd in no_decay)], 'weight_decay': 0.0},
+            {'params': [p for n, p in param_optimizer if not any(nd in n for nd in no_lr_no_decay) and not any(nd in n for nd in no_decay)], 'weight_decay': 0.001}
         ]
         self.optimizer = torch.optim.RMSprop(optimizer_grouped_parameters, lr=config.lr)
         self.scheduler =config.SchedulerClass(self.optimizer, **config.scheduler_params)
