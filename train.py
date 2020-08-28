@@ -63,7 +63,7 @@ model_dict=model.state_dict()
 new_dict = {k: v for k, v in pretrained_weights.items() if k.find("fc_audioset")==-1 and k in model_dict.keys()}
 model_dict.update(new_dict)
 model.load_state_dict(model_dict)
-net=trainer(model,PANNsLoss())   
+net=trainer(model,PANNsLoss(TrainGlobalConfig.label_smoothing,TrainGlobalConfig.eps))   
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 def collate_fn(batch):
     return tuple(zip(*batch))
