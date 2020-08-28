@@ -13,12 +13,16 @@ class TrainGlobalConfig:
     device='cuda:0'
     k_fold=5
     num_workers = 2
-    batch_size = 32
+    batch_size = 16
     n_epochs = 40  # n_epochs = 40
     lr = 0.0004
     folder = 'output'
     verbose = True
     verbose_step = 1
+    #label_smoothing
+    label_smoothing=True
+    eps=0.05  
+    
     step_scheduler = False  # do scheduler.step after optimizer.step
     validation_scheduler = True  # do scheduler.step after validation stage loss
     SchedulerClass = torch.optim.lr_scheduler.ReduceLROnPlateau
@@ -31,5 +35,5 @@ class TrainGlobalConfig:
         threshold_mode='abs',
         cooldown=0,
         min_lr=1e-8,
-        eps=1e-08
+        eps=1e-08      
     )
