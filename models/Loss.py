@@ -12,7 +12,7 @@ class PANNsLoss(nn.Module):
         self.label_smoothing=label_smoothing
         self.epsilon=epsilon
     def label_smooth(self,label):
-        label=label+self.epsilon
+        label=label+self.epsilon/label.size()[-1]
         _,index=torch.max(label,-1)  
         for i in range(label.size()[0]):
             label[i][index[i]]=1-self.epsilon
@@ -29,6 +29,7 @@ class PANNsLoss(nn.Module):
         target = target.float()
         if self.label_smoothing!=None:
             target=self.label_smooth(target)
+        print(target)    
         return self.bce(input_, target)
      
         
