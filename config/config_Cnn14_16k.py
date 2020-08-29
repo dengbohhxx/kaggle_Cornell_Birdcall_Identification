@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import torch
 model_config = {
-    "sample_rate": 16000,
+    "sample_rate": None,
     "window_size": 512,
     "hop_size": 160,
     "mel_bins": 64,
@@ -13,7 +13,7 @@ class TrainGlobalConfig:
     device='cuda:0'
     k_fold=5
     num_workers = 2
-    batch_size = 16
+    batch_size = 32
     n_epochs = 40  # n_epochs = 40
     lr = 0.0004
     folder = 'output'
