@@ -20,12 +20,14 @@ class Ori_Mp3_Dataset(data.Dataset):
     def __getitem__(self, idx):
         mp3_path=self.train_csv.loc[[self.sounds_id[idx]],["file_path"]].values[0][0]
         ebird_code=self.train_csv.loc[[self.sounds_id[idx]],["ebird_code"]].values[0][0]        
-        y, sr = librosa.load(mp3_path,sr=model_config["sample_rate"], mono=True, res_type="kaiser_fast")
+        y, sr = librosa.load(mp3_path,sr=None, mono=True, res_type="kaiser_fast")
         while sr == 0:
             rand_id = np.random.randint(0, self.__len__())
             mp3_path=self.train_csv.loc[[self.sounds_id[rand_id]],["file_path"]].values[0][0]
             ebird_code=self.train_csv.loc[[self.sounds_id[rand_id]],["ebird_code"]].values[0][0]
-            y, sr = librosa.load(mp3_path,sr=model_config["sample_rate"], mono=True, res_type="kaiser_fast")
+            y, sr = librosa.load(mp3_path,sr=None, mono=True, res_type="kaiser_fast")
+        y = librosa.resample(y, orig_sr=sr, target_sr=model_config["sample_rate"], fix=True, scale=False)
+        sr = model_config["sample_rate"]
         if self.waveform_transforms:
             y = self.waveform_transforms(y)
         else:

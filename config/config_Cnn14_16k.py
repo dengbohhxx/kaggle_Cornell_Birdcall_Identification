@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import torch
 model_config = {
-    "sample_rate": None,
+    "sample_rate": 16000,
     "window_size": 512,
     "hop_size": 160,
     "mel_bins": 64,
