@@ -20,7 +20,7 @@ class TrainGlobalConfig:
     verbose = True
     verbose_step = 1
     #label_smoothing
-    label_smoothing=True
+    label_smoothing=False
     eps=0.05  
     
     step_scheduler = False  # do scheduler.step after optimizer.step
