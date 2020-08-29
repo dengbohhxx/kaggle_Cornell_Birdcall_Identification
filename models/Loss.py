@@ -29,7 +29,5 @@ class PANNsLoss(nn.Module):
         target = target.float()
         if self.label_smoothing!=None:
             target=self.label_smooth(target)
-        print(target)    
+
         return self.bce(input_, target)
-     
-        
