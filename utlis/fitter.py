@@ -49,20 +49,12 @@ class Fitter:
             self.save(f'{self.base_dir}/best-checkpoint-{str(self.epoch).zfill(3)}epoch.bin')
         if self.config.validation_scheduler:
             self.scheduler.step(metrics=summary_loss.avg)
-        self.epoch += 1
-    
+        self.epoch += 1    
     def validation(self, val_loader):
         self.model.eval()
         summary_loss = AverageMeter()
         t = time.time()
         for step, (waveform,labels) in enumerate(val_loader):
-            if self.config.verbose:
-                if step % self.config.verbose_step == 0:
-                    print(
-                        f'Val Step {step}/{len(val_loader)}, ' + \
-                        f'summary_loss: {summary_loss.avg:.5f}, ' + \
-                        f'time: {(time.time() - t):.5f}', end='\r'
-                    )
             with torch.no_grad(): 
                 batch_size=self.config.batch_size
                 waveform=torch.tensor(waveform).to(self.device).float()
@@ -70,7 +62,13 @@ class Fitter:
                 loss_v= self.model(waveform,labels)
                 self.writer.add_scalar('VAL_LOSS', loss_v)
                 summary_loss.update(loss_v.detach().item(), batch_size)
-
+                if self.config.verbose:
+                    if step % self.config.verbose_step == 0:
+                        print(
+                            f'Val Step {step}/{len(val_loader)}, ' + \
+                                f'summary_loss: {summary_loss.avg:.5f}, ' + \
+                                    f'time: {(time.time() - t):.5f}', end='\r'
+                       )
         return summary_loss
 
     def train_one_epoch(self, train_loader):
@@ -78,26 +76,27 @@ class Fitter:
         summary_loss = AverageMeter()
         t = time.time()
         for step, (waveform,labels) in enumerate(train_loader):
+            batch_size=self.config.batch_size
+            self.optimizer.zero_grad()            
+            labels=torch.tensor(labels).to(self.device).float()
+            waveform=torch.tensor(waveform).to(self.device).float()
+            loss_t = self.model(waveform,labels)          
+            if step+self.epoch==0:
+                self.writer.add_graph(self.model,(waveform,labels))
+            self.writer.add_scalar('TRAIN_LOSS',loss_t)
+            loss_t.backward()
+            summary_loss.update(loss_t.detach().item(), batch_size)
             if self.config.verbose:
                 if step % self.config.verbose_step == 0:
                     print(
                         f'Train Step {step}/{len(train_loader)}, ' + \
                         f'summary_loss: {summary_loss.avg:.5f}, ' + \
                         f'time: {(time.time() - t):.5f}', end='\r'
-                    )   
-            batch_size=self.config.batch_size
-            self.optimizer.zero_grad()
-            labels=torch.tensor(labels).to(self.device).float()
-            waveform=torch.tensor(waveform).to(self.device).float()
-            loss_t = self.model(waveform,labels)
-            if step+self.epoch==1:
-                self.writer.add_graph(self.model,(waveform,labels))
-            self.writer.add_scalar('TRAIN_LOSS',loss_t)
-            loss_t.backward()
-            summary_loss.update(loss_t.detach().item(), batch_size)
+                    ) 
             self.optimizer.step()
             if self.config.step_scheduler:
                 self.scheduler.step()
+    
         return summary_loss  
 
     def save(self, path):
