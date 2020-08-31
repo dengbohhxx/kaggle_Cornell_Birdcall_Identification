@@ -4,12 +4,12 @@ import pandas as pd
 import librosa
 from config.config_Cnn14_16k import model_config 
 
-data_csv = pd.read_csv("birdsong-recognition/train.csv")
+data_csv = pd.read_csv("birdsong-recognition/resample_dataset_32k/train.csv")
 bird_species=np.unique(np.array(list(data_csv["ebird_code"])))
 BIRD_CODE={ bird:i for i,bird in enumerate(bird_species) }
 INV_BIRD_CODE = {v: k for k, v in BIRD_CODE.items()}
 
-class Ori_Mp3_Dataset(data.Dataset):
+class Ori_Wav_Dataset(data.Dataset):
     def __init__(self,sounds_id,train_all,waveform_transforms=None,peroid=5):
         self.sounds_id = sounds_id  
         self.train_csv=train_all
@@ -18,14 +18,15 @@ class Ori_Mp3_Dataset(data.Dataset):
     def __len__(self):
         return self.sounds_id.shape[0]
     def __getitem__(self, idx):
-        mp3_path=self.train_csv.loc[[self.sounds_id[idx]],["file_path"]].values[0][0]
+        wav_path=self.train_csv.loc[[self.sounds_id[idx]],["file_path"]].values[0][0]
         ebird_code=self.train_csv.loc[[self.sounds_id[idx]],["ebird_code"]].values[0][0]
-        y, sr = librosa.load(mp3_path,sr=model_config["sample_rate"], mono=True, res_type="kaiser_fast")
+        y, sr = librosa.load(wav_path,sr=None, mono=True, res_type="kaiser_fast")
         while sr == 0:
             rand_id = np.random.randint(0, self.__len__())
-            mp3_path=self.train_csv.loc[[self.sounds_id[rand_id]],["file_path"]].values[0][0]
+            wav_path=self.train_csv.loc[[self.sounds_id[rand_id]],["file_path"]].values[0][0]
             ebird_code=self.train_csv.loc[[self.sounds_id[rand_id]],["ebird_code"]].values[0][0]
-            y, sr = librosa.load(mp3_path,sr=model_config["sample_rate"], mono=True, res_type="kaiser_fast")
+            y, sr = librosa.load(wav_path,sr=None, mono=True, res_type="kaiser_fast")
+        #y = librosa.resample(y, orig_sr=sr, target_sr=model_config["sample_rate"], fix=True, scale=False)
         assert sr == model_config["sample_rate"]
         if self.waveform_transforms:
             y = self.waveform_transforms(y)
