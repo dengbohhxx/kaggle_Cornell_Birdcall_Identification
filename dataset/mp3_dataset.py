@@ -26,8 +26,8 @@ class Ori_Mp3_Dataset(data.Dataset):
             mp3_path=self.train_csv.loc[[self.sounds_id[rand_id]],["file_path"]].values[0][0]
             ebird_code=self.train_csv.loc[[self.sounds_id[rand_id]],["ebird_code"]].values[0][0]
             y, sr = librosa.load(mp3_path,sr=None, mono=True, res_type="kaiser_fast")
-        y = librosa.resample(y, orig_sr=sr, target_sr=model_config["sample_rate"], fix=True, scale=False)
-        sr = model_config["sample_rate"]
+        #y = librosa.resample(y, orig_sr=sr, target_sr=model_config["sample_rate"], fix=True, scale=False)
+        assert sr == model_config["sample_rate"]
         if self.waveform_transforms:
             y = self.waveform_transforms(y)
         else:
