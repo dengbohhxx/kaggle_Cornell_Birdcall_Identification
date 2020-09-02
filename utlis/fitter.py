@@ -59,10 +59,12 @@ class Fitter:
         for step, (waveform,labels) in enumerate(val_loader):
             with torch.no_grad(): 
                 batch_size=self.config.batch_size
+                self.val_steps += batch_size
                 waveform=torch.tensor(waveform).to(self.device).float()
                 labels=torch.tensor(labels).to(self.device).float()
                 loss_v= self.model(waveform,labels)
-                self.writer.add_scalar('VAL_LOSS', loss_v, batch_size*(step+1))
+                loss_v = loss_v.mean()
+                self.writer.add_scalar('VAL_LOSS', loss_v, self.val_steps)
                 summary_loss.update(loss_v.detach().item(), batch_size)
                 if self.config.verbose:
                     if step % self.config.verbose_step == 0:
@@ -79,6 +81,7 @@ class Fitter:
         t = time.time()
         for step, (waveform,labels) in enumerate(train_loader):
             batch_size=self.config.batch_size
+            self.train_steps += batch_size
             self.optimizer.zero_grad()            
             labels=torch.tensor(labels).to(self.device).float()
             waveform=torch.tensor(waveform).to(self.device).float()
@@ -86,7 +89,7 @@ class Fitter:
             loss_t = loss_t.mean()
             if step+self.epoch==0:
                 self.writer.add_graph(self.model.module, (waveform,labels))
-            self.writer.add_scalar('TRAIN_LOSS', loss_t, batch_size*(step+1))
+            self.writer.add_scalar('TRAIN_LOSS', loss_t, self.train_steps)
             loss_t.backward()
             summary_loss.update(loss_t.detach().item(), batch_size)
             if self.config.verbose:
