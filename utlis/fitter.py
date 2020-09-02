@@ -82,9 +82,10 @@ class Fitter:
             self.optimizer.zero_grad()            
             labels=torch.tensor(labels).to(self.device).float()
             waveform=torch.tensor(waveform).to(self.device).float()
-            loss_t = self.model(waveform,labels)          
+            loss_t = self.model(waveform,labels)
+            loss_t = loss_t.mean()
             if step+self.epoch==0:
-                self.writer.add_graph(self.model,(waveform,labels))
+                self.writer.add_graph(self.model.module, (waveform,labels))
             self.writer.add_scalar('TRAIN_LOSS', loss_t, batch_size*(step+1))
             loss_t.backward()
             summary_loss.update(loss_t.detach().item(), batch_size)
@@ -104,7 +105,7 @@ class Fitter:
     def save(self, path):
         self.model.eval()
         torch.save({
-            'model_state_dict': self.model.model.state_dict(),
+            'model_state_dict': self.model.module.model.state_dict(),
             'optimizer_state_dict': self.optimizer.state_dict(),
             'scheduler_state_dict': self.scheduler.state_dict(),
             'best_summary_loss': self.best_summary_loss,

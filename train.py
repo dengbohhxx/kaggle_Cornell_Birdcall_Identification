@@ -20,7 +20,7 @@ from dataset.mp3_dataset import Ori_Mp3_Dataset
 from dataset.wav_dataset import Ori_Wav_Dataset
 from utlis.fitter import Fitter
 from models.backbones import  Cnn14_16k, Wavegram_Cnn14, Wavegram_Logmel_Cnn14
-from config.config_Cnn14_16k import model_config,TrainGlobalConfig
+from config.config_Cnn14_16k_parallel import model_config,TrainGlobalConfig
 from models.Trainer import trainer
 from models.Loss import PANNsLoss
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -64,12 +64,16 @@ model_dict=model.state_dict()
 new_dict = {k: v for k, v in pretrained_weights.items() if k.find("fc_audioset")==-1 and k in model_dict.keys()}
 model_dict.update(new_dict)
 model.load_state_dict(model_dict)
-net=trainer(model,PANNsLoss(TrainGlobalConfig.label_smoothing,TrainGlobalConfig.eps))   
+net=trainer(model,PANNsLoss(TrainGlobalConfig.label_smoothing,TrainGlobalConfig.eps))
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 def collate_fn(batch):
     return tuple(zip(*batch))
 device = torch.device(TrainGlobalConfig.device)
+if TrainGlobalConfig.parallel:
+    print('parallel training use', torch.cuda.device_count(), "GPUs")
+    net = torch.nn.DataParallel(net)
 net.to(device)
+
 fitter = Fitter(model=net, device=device, config=TrainGlobalConfig)
 for i in range(TrainGlobalConfig.n_epochs):    
     fold_number = i%TrainGlobalConfig.k_fold
