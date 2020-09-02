@@ -12,8 +12,8 @@ model_config = {
 class TrainGlobalConfig:
     device='cuda:0'
     k_fold=5
-    num_workers = 6
-    batch_size = 16
+    num_workers = 12
+    batch_size = 28
     n_epochs = 40  # n_epochs = 40
     lr = 0.005
     folder = 'output'

@@ -20,14 +20,16 @@ class Fitter:
         no_decay = ['bias', 'bn']
         no_lr_no_decay=['logmel_extractor','spectrogram_extractor']
         optimizer_grouped_parameters = [
-            {'params': [p for n, p in param_optimizer if any(nd in n for nd in no_lr_no_decay)], 'weight_decay': 0.0,'lr':0.0},
-            {'params': [p for n, p in param_optimizer if not any(nd in n for nd in no_lr_no_decay) and any(nd in n for nd in no_decay)], 'weight_decay': 0.0},
-            {'params': [p for n, p in param_optimizer if not any(nd in n for nd in no_lr_no_decay) and not any(nd in n for nd in no_decay)], 'weight_decay': 0.001}
+            {'params': [p for n, p in param_optimizer if any(nd in n for nd in no_lr_no_decay)], 'lr':0.0},
+            {'params': [p for n, p in param_optimizer if not any(nd in n for nd in no_lr_no_decay) and any(nd in n for nd in no_decay)]},
+            {'params': [p for n, p in param_optimizer if not any(nd in n for nd in no_lr_no_decay) and not any(nd in n for nd in no_decay)]}
         ]
         self.optimizer = torch.optim.RMSprop(optimizer_grouped_parameters, lr=config.lr)
         self.scheduler =config.SchedulerClass(self.optimizer, **config.scheduler_params)
         self.log(f'Fitter prepared. Device is {self.device}')
         self.writer=SummaryWriter('output/tensorboard')
+        self.train_steps = 0
+        self.val_steps = 0
         
     def fit(self, train_loader, validation_loader):
         if self.config.verbose:
@@ -60,13 +62,13 @@ class Fitter:
                 waveform=torch.tensor(waveform).to(self.device).float()
                 labels=torch.tensor(labels).to(self.device).float()
                 loss_v= self.model(waveform,labels)
-                self.writer.add_scalar('VAL_LOSS', loss_v)
+                self.writer.add_scalar('VAL_LOSS', loss_v, batch_size*(step+1))
                 summary_loss.update(loss_v.detach().item(), batch_size)
                 if self.config.verbose:
                     if step % self.config.verbose_step == 0:
                         print(
                             f'Val Step {step}/{len(val_loader)}, ' + \
-                                f'summary_loss: {summary_loss.avg:.5f}, ' + \
+                                f'summary_loss: {summary_loss.avg:.8f}, ' + \
                                     f'time: {(time.time() - t):.5f}', end='\r'
                        )
         return summary_loss
@@ -83,14 +85,14 @@ class Fitter:
             loss_t = self.model(waveform,labels)          
             if step+self.epoch==0:
                 self.writer.add_graph(self.model,(waveform,labels))
-            self.writer.add_scalar('TRAIN_LOSS',loss_t)
+            self.writer.add_scalar('TRAIN_LOSS', loss_t, batch_size*(step+1))
             loss_t.backward()
             summary_loss.update(loss_t.detach().item(), batch_size)
             if self.config.verbose:
                 if step % self.config.verbose_step == 0:
                     print(
                         f'Train Step {step}/{len(train_loader)}, ' + \
-                        f'summary_loss: {summary_loss.avg:.5f}, ' + \
+                        f'summary_loss: {summary_loss.avg:.8f}, ' + \
                         f'time: {(time.time() - t):.5f}', end='\r'
                     ) 
             self.optimizer.step()

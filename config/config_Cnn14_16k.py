@@ -13,9 +13,9 @@ class TrainGlobalConfig:
     device='cuda:0'
     k_fold=5
     num_workers = 6
-    batch_size = 16
-    n_epochs = 40  # n_epochs = 40
-    lr = 0.0004
+    batch_size = 30
+    n_epochs = 300
+    lr = 0.0001
     folder = 'output'
     verbose = True
     verbose_step = 1

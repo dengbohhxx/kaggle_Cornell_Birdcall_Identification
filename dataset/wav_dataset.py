@@ -11,7 +11,7 @@ INV_BIRD_CODE = {v: k for k, v in BIRD_CODE.items()}
 
 class Ori_Wav_Dataset(data.Dataset):
     def __init__(self,sounds_id,train_all,waveform_transforms=None,peroid=5):
-        self.sounds_id = sounds_id  
+        self.sounds_id = sounds_id
         self.train_csv=train_all
         self.waveform_transforms = waveform_transforms
         self.peroid=peroid
