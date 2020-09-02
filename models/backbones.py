@@ -2547,7 +2547,7 @@ class Cnn14_16k(nn.Module):
         
         super(Cnn14_16k, self).__init__() 
 
-        assert sample_rate == 16000
+        #assert sample_rate == 16000
         assert window_size == 512
         assert hop_size == 160
         assert mel_bins == 64
@@ -2598,8 +2598,11 @@ class Cnn14_16k(nn.Module):
         """
         Input: (batch_size, data_length)"""
 
+        #print(input.shape)
         x = self.spectrogram_extractor(input)   # (batch_size, 1, time_steps, freq_bins)
+        #print(x.shape)
         x = self.logmel_extractor(x)    # (batch_size, 1, time_steps, mel_bins)
+        #print(x.shape)
 
         x = x.transpose(1, 3)
         x = self.bn0(x)

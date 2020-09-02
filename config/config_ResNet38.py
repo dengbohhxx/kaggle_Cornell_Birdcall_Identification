@@ -2,8 +2,8 @@
 import torch
 model_config = {
     "sample_rate": 32000,
-    "window_size": 512,
-    "hop_size": 160,
+    "window_size": 1024,
+    "hop_size": 320,
     "mel_bins": 64,
     "fmin": 50,
     "fmax": 8000,
@@ -14,8 +14,8 @@ class TrainGlobalConfig:
     k_fold=5
     num_workers = 6
     batch_size = 16
-    n_epochs = 40  # n_epochs = 40
-    lr = 0.0004
+    n_epochs = 4000  # n_epochs = 40
+    lr = 0.001
     folder = 'output'
     verbose = True
     verbose_step = 1
