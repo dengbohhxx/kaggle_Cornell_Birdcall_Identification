@@ -28,6 +28,16 @@ class PANNsLoss(nn.Module):
                              input_)
 
         target = target.float()
+        print(input_)
+        print(target)
+        input_argmax = torch.argmax(input_, dim=1)
+        target_argmax = torch.argmax(target, dim=1)
+        print('input_argmax: ', input_argmax)
+        print('target_argmax: ', target_argmax)
+        input_max = torch.max(input_, dim=1)[0]
+        target_max = torch.max(target, dim=1)[0]
+        print('input_max: ', input_max)
+        print('target_max: ', target_max)
         if self.label_smoothing!=None:
             target=self.label_smooth(target)
 
