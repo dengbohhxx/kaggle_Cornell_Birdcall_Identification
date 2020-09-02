@@ -19,10 +19,10 @@ import torch.nn.functional as F
 
 ROOT = Path.cwd()
 print(ROOT)
-RAW_DATA = ROOT / "birdsong-recognition"
+RAW_DATA = ROOT / "birdsong-recognition/check_test"
 test = pd.read_csv(RAW_DATA / "test.csv")
 TEST_AUDIO_DIR = RAW_DATA / "test_audio"
-weights_path=ROOT/"cnn14_16k_weight"/"best-checkpoint-033epoch.bin"
+weights_path="results/cnn14_lrelu_softmax_wav_32k/best-checkpoint-186epoch.tar"
 SR = 32000
 
 def get_model(config, weights_path):
@@ -74,10 +74,10 @@ def prediction_for_clip(test_df, clip,model,threshold=0.5,period=5,stride=2,sr=3
             labels = np.argwhere(event).reshape(-1).tolist()
             for label in labels:
                 all_events.add(label)
-        if len(labels) == 0:
+        if len(all_events) == 0:
             prediction_dict[row_id] = "nocall"
         else:
-            labels_str_list = list(map(lambda x: INV_BIRD_CODE[x], labels))
+            labels_str_list = list(map(lambda x: INV_BIRD_CODE[x], all_events))
             label_string = " ".join(labels_str_list)
             prediction_dict[row_id] = label_string
         print(prediction_dict[row_id])
