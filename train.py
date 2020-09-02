@@ -19,8 +19,8 @@ from sklearn.model_selection import StratifiedKFold
 from dataset.mp3_dataset import Ori_Mp3_Dataset
 from dataset.wav_dataset import Ori_Wav_Dataset
 from utlis.fitter import Fitter
-from models.backbones import  Cnn14_16k, Wavegram_Cnn14, Wavegram_Logmel_Cnn14
-from config.config_Cnn14_16k import model_config,TrainGlobalConfig
+from models.backbones import  Cnn14_16k, ResNet38, Wavegram_Cnn14, Wavegram_Logmel_Cnn14
+from config.config_ResNet38_relu_softmax import model_config, TrainGlobalConfig
 from models.Trainer import trainer
 from models.Loss import PANNsLoss
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -57,8 +57,8 @@ for fold_number, (train_index, val_index) in enumerate(skf.split(train_all, trai
     train_all.loc[train_all.iloc[val_index].index, 'fold'] = fold_number
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ###构建模型###
-model=Cnn14_16k(**model_config)
-checkpoint=torch.load("./pretrained_weight/Cnn14_16k_mAP=0.438.pth",map_location="cpu")
+model=ResNet38(**model_config)
+checkpoint=torch.load("./pretrained_weight/ResNet38_mAP=0.434.pth",map_location="cpu")
 pretrained_weights=checkpoint["model"]
 model_dict=model.state_dict()
 new_dict = {k: v for k, v in pretrained_weights.items() if k.find("fc_audioset")==-1 and k in model_dict.keys()}
