@@ -19,6 +19,7 @@ class PANNsLoss(nn.Module):
         return label    
     def forward(self, input, target):
         input_ = input["clipwise_output"]
+
         input_ = torch.where(torch.isnan(input_),
                              torch.zeros_like(input_),
                              input_)

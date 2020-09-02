@@ -2547,7 +2547,7 @@ class Cnn14_16k(nn.Module):
         
         super(Cnn14_16k, self).__init__() 
 
-        assert sample_rate == 16000
+        #assert sample_rate == 16000
         assert window_size == 512
         assert hop_size == 160
         assert mel_bins == 64
@@ -2588,6 +2588,8 @@ class Cnn14_16k(nn.Module):
         self.fc_audioset = nn.Linear(2048, classes_num, bias=True)
         
         self.init_weight()
+
+        self.relus = torch.nn.LeakyReLU()
 
     def init_weight(self):
         init_bn(self.bn0)
@@ -2632,8 +2634,10 @@ class Cnn14_16k(nn.Module):
         x = F.dropout(x, p=0.5, training=self.training)
         x = F.relu_(self.fc1(x))
         embedding = F.dropout(x, p=0.5, training=self.training)
-        clipwise_output = torch.sigmoid(self.fc_audioset(x))
-        
+        x = self.fc_audioset(x)
+        #clipwise_output = torch.sigmoid(x)
+        clipwise_output = self.relus(x)
+        clipwise_output = F.softmax(clipwise_output)
         output_dict = {'clipwise_output': clipwise_output, 'embedding': embedding}
 
         return output_dict
