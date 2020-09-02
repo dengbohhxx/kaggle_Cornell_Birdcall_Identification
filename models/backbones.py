@@ -2589,6 +2589,8 @@ class Cnn14_16k(nn.Module):
         
         self.init_weight()
 
+        self.bn1d_fc1 = torch.nn.BatchNorm1d(2048)
+        self.bn1d_fcaudio = torch.nn.BatchNorm1d(classes_num)
         self.relus = torch.nn.LeakyReLU()
 
     def init_weight(self):
