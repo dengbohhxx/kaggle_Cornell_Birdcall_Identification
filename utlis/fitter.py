@@ -20,9 +20,9 @@ class Fitter:
         no_decay = ['bias', 'bn']
         no_lr_no_decay=['logmel_extractor','spectrogram_extractor']
         optimizer_grouped_parameters = [
-            {'params': [p for n, p in param_optimizer if any(nd in n for nd in no_lr_no_decay)], 'weight_decay': 0.0,'lr':0.0},
-            {'params': [p for n, p in param_optimizer if not any(nd in n for nd in no_lr_no_decay) and any(nd in n for nd in no_decay)], 'weight_decay': 0.0},
-            {'params': [p for n, p in param_optimizer if not any(nd in n for nd in no_lr_no_decay) and not any(nd in n for nd in no_decay)], 'weight_decay': 0.001}
+            {'params': [p for n, p in param_optimizer if any(nd in n for nd in no_lr_no_decay)],'lr':0.0},
+            {'params': [p for n, p in param_optimizer if not any(nd in n for nd in no_lr_no_decay) and any(nd in n for nd in no_decay)]},
+            {'params': [p for n, p in param_optimizer if not any(nd in n for nd in no_lr_no_decay) and not any(nd in n for nd in no_decay)]}
         ]
         self.optimizer = torch.optim.RMSprop(optimizer_grouped_parameters, lr=config.lr)
         self.scheduler =config.SchedulerClass(self.optimizer, **config.scheduler_params)
@@ -31,7 +31,7 @@ class Fitter:
         
     def fit(self, train_loader, validation_loader):
         if self.config.verbose:
-            lr = self.optimizer.param_groups[0]['lr']
+            lr = self.optimizer.param_groups[1]['lr']
             timestamp = datetime.datetime.now().utcnow().isoformat()
             self.log(f'\n{timestamp}\nLR: {lr}')           
         t = time.time()
