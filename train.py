@@ -17,10 +17,9 @@ from pathlib import Path
 from sklearn.model_selection import StratifiedKFold
 
 from dataset.mp3_dataset import Ori_Mp3_Dataset
-from dataset.wav_dataset import Ori_Wav_Dataset
 from utlis.fitter import Fitter
-from models.backbones import  Cnn14_16k, Wavegram_Cnn14, Wavegram_Logmel_Cnn14
-from config.config_Wavegram_Logmel_Cnn14 import model_config,TrainGlobalConfig
+from models.backbones import  Cnn14_16k
+from config.config_Cnn14_16k import model_config,TrainGlobalConfig
 from models.Trainer import trainer
 from models.Loss import PANNsLoss
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -38,8 +37,8 @@ set_seed(1024)
 ###路径设置###
 ROOT = Path.cwd()
 print(ROOT)
-RAW_DATA = ROOT / "birdsong-recognition/resample_dataset_32k"
-TRAIN_AUDIO_DIR = RAW_DATA / "train_audio_resampled"
+RAW_DATA = ROOT / "birdsong-recognition"
+TRAIN_AUDIO_DIR = RAW_DATA / "train_audio"
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ###k折交叉验证###
 train_data = pd.read_csv(RAW_DATA/"train.csv")
@@ -47,18 +46,18 @@ tmp_list = []
 for ebird_d in TRAIN_AUDIO_DIR.iterdir():
     for audio_file in ebird_d.iterdir():
         tmp_list.append([ebird_d.name, audio_file.name, audio_file.as_posix()])
-train_audio_path_exist = pd.DataFrame(tmp_list, columns=["ebird_code", "resampled_filename", "file_path"])
+train_audio_path_exist = pd.DataFrame(tmp_list, columns=["ebird_code", "filename", "file_path"])
 del tmp_list
 train_all = pd.merge(
-    train_data, train_audio_path_exist, on=["ebird_code", "resampled_filename"], how="inner")
+    train_data, train_audio_path_exist, on=["ebird_code", "filename"], how="inner")
 train_all.loc[:, 'fold'] = -1
 skf = StratifiedKFold(n_splits=TrainGlobalConfig.k_fold, shuffle=True, random_state=1024)
 for fold_number, (train_index, val_index) in enumerate(skf.split(train_all, train_all["ebird_code"])):
     train_all.loc[train_all.iloc[val_index].index, 'fold'] = fold_number
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ###构建模型###
-model=Wavegram_Logmel_Cnn14(**model_config)
-checkpoint=torch.load("./pretrained_weight/Wavegram_Logmel_Cnn14_mAP=0.439.pth",map_location="cpu")
+model=Cnn14_16k(**model_config)
+checkpoint=torch.load("./pretrained_weight/Cnn14_16k_mAP=0.438.pth",map_location="cpu")
 pretrained_weights=checkpoint["model"]
 model_dict=model.state_dict()
 new_dict = {k: v for k, v in pretrained_weights.items() if k.find("fc_audioset")==-1 and k in model_dict.keys()}
@@ -73,12 +72,12 @@ net.to(device)
 fitter = Fitter(model=net, device=device, config=TrainGlobalConfig)
 for i in range(TrainGlobalConfig.n_epochs):    
     fold_number = i%TrainGlobalConfig.k_fold
-    train_dataset = Ori_Wav_Dataset(
+    train_dataset = Ori_Mp3_Dataset(
         sounds_id=train_all[train_all['fold'] != fold_number].index.values,
         train_all=train_all,
         waveform_transforms=None,
     )
-    validation_dataset = Ori_Wav_Dataset(
+    validation_dataset = Ori_Mp3_Dataset(
         sounds_id=train_all[train_all['fold'] == fold_number].index.values,
         train_all=train_all,
         waveform_transforms=None,
