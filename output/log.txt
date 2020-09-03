@@ -1,0 +1,28 @@
+Fitter prepared. Device is cpu
+
+2020-09-03T10:37:01.847261
+LR: 0.0
+Fitter prepared. Device is cpu
+
+2020-09-03T10:43:07.875358
+LR: 0.0004
+Fitter prepared. Device is cpu
+
+2020-09-03T10:47:05.580650
+LR: 0.0004
+Fitter prepared. Device is cpu
+
+2020-09-03T10:50:41.312430
+LR: 0.0004
+Fitter prepared. Device is cpu
+
+2020-09-03T11:01:18.711363
+LR: 0.0004
+Fitter prepared. Device is cpu
+
+2020-09-03T11:28:13.248403
+LR: 0.0004
+Fitter prepared. Device is cpu
+
+2020-09-03T11:30:15.282377
+LR: 0.0004
