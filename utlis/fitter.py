@@ -83,8 +83,8 @@ class Fitter:
             labels=torch.tensor(labels).to(self.device).float()
             waveform=torch.tensor(waveform).to(self.device).float()
             loss_t = self.model(waveform,labels)          
-            if step+self.epoch==0:
-                self.writer.add_graph(self.model,(waveform,labels))
+            #if step+self.epoch==0:
+            #    self.writer.add_graph(self.model,(waveform,labels))
             self.writer.add_scalar('TRAIN_LOSS', loss_t, batch_size*(step+1))
             loss_t.backward()
             summary_loss.update(loss_t.detach().item(), batch_size)

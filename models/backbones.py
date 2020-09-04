@@ -901,6 +901,8 @@ class ResNet38(nn.Module):
 
         self.relus = torch.nn.LeakyReLU()
 
+        self.pre_input = 0
+
     def init_weights(self):
         init_bn(self.bn0)
         init_layer(self.fc1)
@@ -922,8 +924,8 @@ class ResNet38(nn.Module):
             x = self.spec_augmenter(x)
 
         # Mixup on spectrogram
-        if self.training and mixup_lambda is not None:
-            x = do_mixup(x, mixup_lambda)
+        #if self.training and mixup_lambda is not None:
+        #    x = do_mixup(x, mixup_lambda)
         
         x = self.conv_block1(x, pool_size=(2, 2), pool_type='avg')
         x = F.dropout(x, p=0.2, training=self.training, inplace=True)

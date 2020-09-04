@@ -15,19 +15,20 @@ def move_data_to_device(x, device):
     return x.to(device)
 
 
-def do_mixup(x, mixup_lambda):
-    """Mixup x of even indexes (0, 2, 4, ...) with x of odd indexes 
-    (1, 3, 5, ...).
+def do_mixup(x1, x2, mixup_lambda):
+    '''
+    Mixup x1 with x2
 
     Args:
-      x: (batch_size * 2, ...)
-      mixup_lambda: (batch_size * 2,)
+        x1: (batch_size, ...)
+        x2: (batch_size, ...)
+        mixup_lambda: scalar
 
     Returns:
-      out: (batch_size, ...)
-    """
-    out = (x[0 :: 2].transpose(0, -1) * mixup_lambda[0 :: 2] + \
-        x[1 :: 2].transpose(0, -1) * mixup_lambda[1 :: 2]).transpose(0, -1)
+        out: (batch_size, ...)
+    '''
+
+    out = mixup_lambda * x1 + (1.0 - mixup_lambda) * x2
     return out
     
 
