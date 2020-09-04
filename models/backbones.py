@@ -942,7 +942,6 @@ class ResNet38(nn.Module):
         embedding = F.dropout(x, p=0.5, training=self.training)
         #clipwise_output = torch.sigmoid(self.fc_audioset(x))
         x = self.fc_audioset(x)
-        #clipwise_output = torch.sigmoid(x)
         clipwise_output = self.relus(x)
         clipwise_output = F.softmax(clipwise_output)
         
