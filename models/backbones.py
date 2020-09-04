@@ -2362,6 +2362,8 @@ class Wavegram_Logmel_Cnn14(nn.Module):
         
         self.init_weight()
 
+        self.relus = torch.nn.LeakyReLU()
+
     def init_weight(self):
         init_layer(self.pre_conv0)
         init_bn(self.pre_bn0)
@@ -2421,7 +2423,10 @@ class Wavegram_Logmel_Cnn14(nn.Module):
         x = F.dropout(x, p=0.5, training=self.training)
         x = F.relu_(self.fc1(x))
         embedding = F.dropout(x, p=0.5, training=self.training)
-        clipwise_output = torch.sigmoid(self.fc_audioset(x))
+        #clipwise_output = torch.sigmoid(self.fc_audioset(x))
+        x = self.fc_audioset(x)
+        clipwise_output = self.relus(x)
+        clipwise_output = F.softmax(clipwise_output)
         
         output_dict = {'clipwise_output': clipwise_output, 'embedding': embedding}
 
