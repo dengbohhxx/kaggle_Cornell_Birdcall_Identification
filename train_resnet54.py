@@ -12,12 +12,12 @@ import numpy as np
 import pandas as pd
 import torch
 from torch.utils.data import RandomSampler,SequentialSampler
-
+import torch.nn as nn
 from pathlib import Path
 from sklearn.model_selection import StratifiedKFold
 from dataset.mp3_dataset import Ori_Mp3_Dataset
 from utlis.fitter import Fitter
-from models.backbones import Cnn14_DecisionLevelAtt,AttBlock
+from models.backbones import ResNet54,init_layer
 from config.Cnn14_DecisionLevelAtt import model_config,TrainGlobalConfig
 from models.Trainer import trainer
 from models.Loss import PANNsLoss
@@ -56,12 +56,12 @@ for fold_number, (train_index, val_index) in enumerate(skf.split(train_all, trai
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ###构建模型###
 model_config["classes_num"] = 527
-model=Cnn14_DecisionLevelAtt(**model_config)
+model=ResNet54(**model_config)
 checkpoint=torch.load("./pretrained_weight/Cnn14_DecisionLevelAtt_mAP0.425.pth",map_location="cpu")
 pretrained_weights=checkpoint["model"]
 model.load_state_dict(pretrained_weights)
-model.att_block = AttBlock(2048, 264, activation='sigmoid')
-model.att_block.init_weights()
+model.fc_audioset = nn.Linear(2048, 264, bias=True)
+init_layer(model.fc_audioset)
 net=trainer(model,PANNsLoss(TrainGlobalConfig.label_smoothing,TrainGlobalConfig.eps))   
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 def collate_fn(batch):

@@ -14,11 +14,11 @@ class TrainGlobalConfig:
     num_workers = 2
     batch_size = 16
     n_epochs = 40  # n_epochs = 40
-    lr =0.001
+    lr =0.0004
     folder = 'output'
     verbose = True
     verbose_step = 1
     #label_smoothing
-    label_smoothing=False
+    label_smoothing=True
     eps=0.05  
     validation_scheduler = True  # do scheduler.step after validation stage loss
