@@ -5,6 +5,7 @@ import datetime
 import time
 from utlis.averagemeter import AverageMeter
 from torch.utils.tensorboard import SummaryWriter
+import torch.optim as optim
 class Fitter:
     def __init__(self, model, device, config):       
         self.config = config      
@@ -16,7 +17,8 @@ class Fitter:
         self.best_summary_loss = 10 ** 5
         self.model = model
         self.device = device        
-        param_optimizer = list(self.model.named_parameters())
+        #param_optimizer = list(self.model.named_parameters())
+        '''
         no_decay = ['bias', 'bn']
         no_lr_no_decay=['logmel_extractor','spectrogram_extractor']
         optimizer_grouped_parameters = [
@@ -24,14 +26,15 @@ class Fitter:
             {'params': [p for n, p in param_optimizer if not any(nd in n for nd in no_lr_no_decay) and any(nd in n for nd in no_decay)]},
             {'params': [p for n, p in param_optimizer if not any(nd in n for nd in no_lr_no_decay) and not any(nd in n for nd in no_decay)]}
         ]
-        self.optimizer = torch.optim.RMSprop(optimizer_grouped_parameters, lr=config.lr)
-        self.scheduler =config.SchedulerClass(self.optimizer, **config.scheduler_params)
+        '''
+        self.optimizer = optim.Adam(model.parameters(),lr=self.config.lr)
+        self.scheduler =optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max=10)
         self.log(f'Fitter prepared. Device is {self.device}')
         self.writer=SummaryWriter('output/tensorboard')
         
     def fit(self, train_loader, validation_loader):
         if self.config.verbose:
-            lr = self.optimizer.param_groups[1]['lr']
+            lr = self.optimizer.param_groups[0]['lr']
             timestamp = datetime.datetime.now().utcnow().isoformat()
             self.log(f'\n{timestamp}\nLR: {lr}')           
         t = time.time()
@@ -48,7 +51,7 @@ class Fitter:
             self.model.eval()
             self.save(f'{self.base_dir}/best-checkpoint-{str(self.epoch).zfill(3)}epoch.tar')
         if self.config.validation_scheduler:
-            self.scheduler.step(metrics=summary_loss.avg)
+            self.scheduler.step()
         self.epoch += 1    
     def validation(self, val_loader):
         self.model.eval()
@@ -60,7 +63,7 @@ class Fitter:
                 waveform=torch.tensor(waveform).to(self.device).float()
                 labels=torch.tensor(labels).to(self.device).float()
                 loss_v= self.model(waveform,labels)
-                self.writer.add_scalar('VAL_LOSS', loss_v)
+                self.writer.add_scalar('VAL_LOSS', loss_v,batch_size*(step+1))
                 summary_loss.update(loss_v.detach().item(), batch_size)
                 if self.config.verbose:
                     if step % self.config.verbose_step == 0:
@@ -83,7 +86,7 @@ class Fitter:
             loss_t = self.model(waveform,labels)          
             if step+self.epoch==0:
                 self.writer.add_graph(self.model,(waveform,labels))
-            self.writer.add_scalar('TRAIN_LOSS',loss_t)
+            self.writer.add_scalar('TRAIN_LOSS',loss_t,batch_size*(step+1))
             loss_t.backward()
             summary_loss.update(loss_t.detach().item(), batch_size)
             if self.config.verbose:
@@ -93,10 +96,7 @@ class Fitter:
                         f'summary_loss: {summary_loss.avg:.5f}, ' + \
                         f'time: {(time.time() - t):.5f}', end='\r'
                     ) 
-            self.optimizer.step()
-            if self.config.step_scheduler:
-                self.scheduler.step()
-    
+            self.optimizer.step()    
         return summary_loss  
 
     def save(self, path):
