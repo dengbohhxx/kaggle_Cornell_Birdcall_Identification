@@ -74,7 +74,6 @@ def prediction_for_clip(test_df, clip,model,threshold=0.5,period=5,stride=2,sr=3
         temp=test_df.loc[i, :]
         row_id = temp.row_id
         seconds=temp.seconds
-        print(seconds)
         if np.isnan(seconds) :
             seconds=int(len(clip)/sr)
             #print(f'nan:{seconds}')
@@ -85,12 +84,10 @@ def prediction_for_clip(test_df, clip,model,threshold=0.5,period=5,stride=2,sr=3
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         all_events = set()
         audio=torch.tensor(splited).to(device).float()
-        print(audio.size())
         #audio=torch.unsqueeze(audio, 0)
         with torch.no_grad():
             prediction = model(audio)["clipwise_output"]
-            proba = prediction.detach().cpu().numpy()
-            print(proba.sum())                   
+            proba = prediction.detach().cpu().numpy()                 
         labels = proba >= threshold
         for label in labels:
             label=np.argwhere(label).reshape(-1).tolist()
@@ -102,7 +99,6 @@ def prediction_for_clip(test_df, clip,model,threshold=0.5,period=5,stride=2,sr=3
             labels_str_list = list(map(lambda x: INV_BIRD_CODE[x], all_events))
             label_string = " ".join(labels_str_list)
             prediction_dict[row_id] = label_string
-        print(prediction_dict[row_id])
     return prediction_dict         
         
 # In[ ]:
