@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import numpy as np
@@ -142,7 +143,5 @@ submission = prediction(test_df=test,
 submission.to_csv("submission.csv", index=False)
 
 
-# In[ ]:
 
 
-submission
