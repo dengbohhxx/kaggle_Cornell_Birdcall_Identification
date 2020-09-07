@@ -27,8 +27,8 @@ class Fitter:
             {'params': [p for n, p in param_optimizer if not any(nd in n for nd in no_lr_no_decay) and not any(nd in n for nd in no_decay)]}
         ]
         '''
-        self.optimizer = optim.Adam(model.parameters(),lr=self.config.lr)
-        self.scheduler =optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max=10)
+        self.optimizer = torch.optim.RMSprop(model.parameters(), lr=config.lr)
+        self.scheduler =config.SchedulerClass(self.optimizer, **config.scheduler_params)
         self.log(f'Fitter prepared. Device is {self.device}')
         self.writer=SummaryWriter('output/tensorboard')
         

@@ -14,12 +14,11 @@ class Trainer(nn.module):
         return loss           
 """
 import torch.nn as nn
-from config.resnet54 import TrainGlobalConfig
 class trainer(nn.Module):
     def __init__(self,model,loss_F):
         super().__init__()
         self.model=model
         self.loss_F=loss_F
     def forward(self,x,label):
-        inputs=self.model(x,TrainGlobalConfig.batch_size)
+        inputs=self.model(x)
         return self.loss_F(inputs,label)

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import torch
 model_config = {
     "sample_rate": 32000,
     "window_size": 1024,
@@ -14,7 +15,7 @@ class TrainGlobalConfig:
     num_workers = 2
     batch_size = 16
     n_epochs = 40  # n_epochs = 40
-    lr =0.0004
+    lr =0.0001
     folder = 'output'
     verbose = True
     verbose_step = 1
@@ -22,3 +23,16 @@ class TrainGlobalConfig:
     label_smoothing=True
     eps=0.05  
     validation_scheduler = True  # do scheduler.step after validation stage loss
+    step_scheduler = False  # do scheduler.step after optimizer.step
+    SchedulerClass = torch.optim.lr_scheduler.ReduceLROnPlateau
+    scheduler_params = dict(
+        mode='min',
+        factor=0.5,
+        patience=1,
+        verbose=False,
+        threshold=0.0001,
+        threshold_mode='abs',
+        cooldown=0,
+        min_lr=1e-8,
+        eps=1e-08      
+        )
