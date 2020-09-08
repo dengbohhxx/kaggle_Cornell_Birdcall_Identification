@@ -27,7 +27,7 @@ class Fitter:
             {'params': [p for n, p in param_optimizer if not any(nd in n for nd in no_lr_no_decay) and not any(nd in n for nd in no_decay)]}
         ]
         '''
-        self.optimizer = torch.optim.RMSprop(model.parameters(), lr=config.lr)
+        self.optimizer = torch.optim.RMSprop(model.parameters(), lr=config.lr,momentum=0.9)
         self.scheduler =config.SchedulerClass(self.optimizer, **config.scheduler_params)
         self.log(f'Fitter prepared. Device is {self.device}')
         self.writer=SummaryWriter('output/tensorboard')
@@ -80,10 +80,10 @@ class Fitter:
         t = time.time()
         for step, (waveform,labels) in enumerate(train_loader):
             batch_size=self.config.batch_size
-            self.optimizer.zero_grad()            
+            self.optimizer.zero_grad()                       
             labels=torch.tensor(labels).to(self.device).float()
             waveform=torch.tensor(waveform).to(self.device).float()
-            loss_t = self.model(waveform,labels)          
+            loss_t = self.model(waveform,labels)
             if step+self.epoch==0:
                 self.writer.add_graph(self.model,(waveform,labels))
             self.writer.add_scalar('TRAIN_LOSS',loss_t,batch_size*(step+1))
@@ -96,7 +96,9 @@ class Fitter:
                         f'summary_loss: {summary_loss.avg:.5f}, ' + \
                         f'time: {(time.time() - t):.5f}', end='\r'
                     ) 
-            self.optimizer.step()    
+            self.optimizer.step() 
+            if self.config.step_scheduler:
+                self.scheduler.step()
         return summary_loss  
 
     def save(self, path):
