@@ -4,8 +4,8 @@
 ## Loss Functions
 import torch
 import torch.nn as nn
-class PANNsLoss(nn.Module):
-    def __init__(self,label_smoothing=None,epsilon=0.05):
+class sig_bce_Loss(nn.Module):
+    def __init__(self,label_smoothing=False,epsilon=0.05):
         super().__init__()
 
         self.bce = nn.BCELoss()
@@ -18,16 +18,15 @@ class PANNsLoss(nn.Module):
             label[i][index[i]]=1-self.epsilon
         return label    
     def forward(self, input, target):
-        input_ = input["clipwise_output"]
+        input_ = input
         input_ = torch.where(torch.isnan(input_),
                              torch.zeros_like(input_),
                              input_)
         input_ = torch.where(torch.isinf(input_),
                              torch.zeros_like(input_),
                              input_)
-
+        input_ = nn.functional.sigmoid(input)
         target = target.float()
-        if self.label_smoothing!=None:
+        if self.label_smoothing!=False:
             target=self.label_smooth(target)
-
         return self.bce(input_, target)
