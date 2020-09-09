@@ -20,7 +20,7 @@ from dataset.mp3_dataset import Ori_Mp3_Dataset
 from dataset.wav_dataset import Ori_Wav_Dataset
 from utlis.fitter import Fitter
 from models.backbones import  Cnn14_16k, Wavegram_Cnn14, Wavegram_Logmel_Cnn14
-from config.config_parallel_Wavegram_Logmel_Cnn14 import model_config,TrainGlobalConfig
+from config.config_parallel_Wavegram_Logmel_Cnn14_strippooling import model_config,TrainGlobalConfig
 from models.Trainer import trainer
 from models.Loss import PANNsLoss
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
