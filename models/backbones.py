@@ -899,10 +899,6 @@ class ResNet38(nn.Module):
 
         self.init_weights()
 
-        self.relus = torch.nn.LeakyReLU()
-
-        self.pre_input = 0
-
     def init_weights(self):
         init_bn(self.bn0)
         init_layer(self.fc1)
@@ -942,10 +938,7 @@ class ResNet38(nn.Module):
         x = F.dropout(x, p=0.5, training=self.training)
         x = F.relu_(self.fc1(x))
         embedding = F.dropout(x, p=0.5, training=self.training)
-        #clipwise_output = torch.sigmoid(self.fc_audioset(x))
-        x = self.fc_audioset(x)
-        clipwise_output = self.relus(x)
-        clipwise_output = F.softmax(clipwise_output)
+        clipwise_output = torch.sigmoid(self.fc_audioset(x))
         
         output_dict = {'clipwise_output': clipwise_output, 'embedding': embedding}
 

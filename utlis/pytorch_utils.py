@@ -16,18 +16,6 @@ def move_data_to_device(x, device):
 
 
 def do_mixup(x1, x2, mixup_lambda):
-    '''
-    Mixup x1 with x2
-
-    Args:
-        x1: (batch_size, ...)
-        x2: (batch_size, ...)
-        mixup_lambda: scalar
-
-    Returns:
-        out: (batch_size, ...)
-    '''
-
     out = mixup_lambda * x1 + (1.0 - mixup_lambda) * x2
     return out
     

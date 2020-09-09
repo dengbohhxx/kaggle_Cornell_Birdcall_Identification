@@ -88,7 +88,6 @@ class Fitter:
             labels=torch.tensor(labels).to(self.device).float()
             waveform=torch.tensor(waveform).to(self.device).float()
             if self.mixup and (waveform.shape[0] == self.pre_x.shape[0]):
-                print('mmmmmmmmmmmmmmmmmm')
                 self.pre_x = self.pre_x[0:waveform.shape[0],:]
                 self.pre_y = self.pre_y[0:waveform.shape[0],:]
                 x_mixup = do_mixup(waveform.cpu(), self.pre_x.cpu(), mixup_lambda=0.3).cuda()
