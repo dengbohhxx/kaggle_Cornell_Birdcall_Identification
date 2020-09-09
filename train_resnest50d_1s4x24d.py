@@ -66,12 +66,13 @@ for fold_number, (train_index, val_index) in enumerate(skf.split(train_all, trai
 model=create_model(model_name="resnest50d_1s4x24d")
 checkpoint=torch.load('./pretrained_weight/resnest50_fast_1s4x24d-d4a4f76f.pth',map_location="cpu")
 model.load_state_dict(checkpoint)
+del model.fc
 model.fc=nn.Sequential(
-            nn.Linear(2048, 1024), nn.ReLU(), nn.Dropout(p=0.2),
-            nn.Linear(1024, 1024), nn.ReLU(), nn.Dropout(p=0.2),
+            nn.Linear(2048, 1024), nn.ReLU(),
+            nn.Linear(1024, 1024), nn.ReLU(),
             nn.Linear(1024, model_config["classes_num"]))
 net=trainer(model,sig_bce_Loss(TrainGlobalConfig.label_smoothing,TrainGlobalConfig.eps)) 
-
+print(net)
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 def collate_fn(batch):
     return tuple(zip(*batch))
