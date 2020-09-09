@@ -2,7 +2,7 @@ import torch.utils.data as data
 import numpy as np
 import pandas as pd
 import librosa
-from config.config_ResNet38_relu_softmax import model_config
+from config.config_ResNet38_relu_softmax_mixup import model_config
 
 data_csv = pd.read_csv("birdsong-recognition/resample_dataset_32k/train.csv")
 bird_species=np.unique(np.array(list(data_csv["ebird_code"])))

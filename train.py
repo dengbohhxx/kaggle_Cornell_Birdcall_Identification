@@ -20,7 +20,7 @@ from dataset.mp3_dataset import Ori_Mp3_Dataset
 from dataset.wav_dataset import Ori_Wav_Dataset
 from utlis.fitter import Fitter
 from models.backbones import  Cnn14_16k, ResNet38, Wavegram_Cnn14, Wavegram_Logmel_Cnn14
-from config.config_ResNet38_relu_softmax import model_config, TrainGlobalConfig
+from config.config_ResNet38_relu_softmax_mixup import model_config, TrainGlobalConfig
 from models.Trainer import trainer
 from models.Loss import PANNsLoss
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
