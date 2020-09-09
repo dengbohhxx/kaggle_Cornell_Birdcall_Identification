@@ -4,6 +4,7 @@ import torch
 import datetime
 import time
 from utlis.averagemeter import AverageMeter
+from utlis.pytorch_utils import do_mixup
 from torch.utils.tensorboard import SummaryWriter
 class Fitter:
     def __init__(self, model, device, config):       
@@ -30,6 +31,10 @@ class Fitter:
         self.writer=SummaryWriter('output/tensorboard')
         self.train_steps = 0
         self.val_steps = 0
+
+        self.mixup = True
+        self.pre_x = torch.ones((config.batch_size, 160000)).cuda()
+        self.pre_y = torch.ones((config.batch_size, 264)).cuda()
         
     def fit(self, train_loader, validation_loader):
         if self.config.verbose:
@@ -85,10 +90,21 @@ class Fitter:
             self.optimizer.zero_grad()            
             labels=torch.tensor(labels).to(self.device).float()
             waveform=torch.tensor(waveform).to(self.device).float()
-            loss_t = self.model(waveform,labels)
+            if self.mixup and (waveform.shape[0] == self.pre_x.shape[0]):
+                self.pre_x = self.pre_x[0:waveform.shape[0],:]
+                self.pre_y = self.pre_y[0:waveform.shape[0],:]
+                x_mixup = do_mixup(waveform.cpu(), self.pre_x.cpu(), mixup_lambda=0.3).cuda()
+                #y_mixup = do_mixup(labels.cpu(), self.pre_y.cpu(), mixup_lambda=0.3).cuda()
+                loss_t_1 = self.model(x_mixup,labels)
+                loss_t_2 = self.model(x_mixup,self.pre_y)
+                loss_t = do_mixup(loss_t_1.cpu(), loss_t_2.cpu(), mixup_lambda=0.3).cuda()
+                self.pre_x = waveform.clone()
+                self.pre_y = labels.clone()
+            else:
+                loss_t = self.model(waveform,labels)
             loss_t = loss_t.mean()
-            if step+self.epoch==0:
-                self.writer.add_graph(self.model.module, (waveform,labels))
+            #if step+self.epoch==0:
+            #    self.writer.add_graph(self.model.module, (waveform,labels))
             self.writer.add_scalar('TRAIN_LOSS', loss_t, self.train_steps)
             loss_t.backward()
             summary_loss.update(loss_t.detach().item(), batch_size)

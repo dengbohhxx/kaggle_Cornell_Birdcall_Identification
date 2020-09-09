@@ -2,7 +2,7 @@ import torch.utils.data as data
 import numpy as np
 import pandas as pd
 import librosa
-from config.config_Cnn14_16k import model_config 
+from config.config_parallel_Wavegram_Logmel_Cnn14 import model_config
 
 data_csv = pd.read_csv("birdsong-recognition/train.csv")
 bird_species=np.unique(np.array(list(data_csv["ebird_code"])))
