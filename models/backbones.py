@@ -2363,14 +2363,15 @@ class Wavegram_Logmel_Cnn14(nn.Module):
         
         self.init_weight()
 
-        inter_channels_1 = 64
-        inter_channels_2 = 256
+        inter_channels_1 = 256
         strip_bn = nn.BatchNorm2d
         up_kwargs = {'mode': 'bilinear', 'align_corners': True}
-        self.strip_pooling1 = StripPooling(inter_channels_1, (48, 32), strip_bn, up_kwargs)
-        self.strip_pooling2 = StripPooling(inter_channels_1, (48, 32), strip_bn, up_kwargs)
-        self.strip_pooling3 = StripPooling(inter_channels_2, (10, 8), strip_bn, up_kwargs)
-        self.strip_pooling4 = StripPooling(inter_channels_2, (10, 8), strip_bn, up_kwargs)
+        self.convsp1 = nn.Conv2d(in_channels=256,
+                                 out_channels=256,
+                                 kernel_size=(3, 3), stride=(1, 1),
+                                 padding=(1, 1), bias=False)
+        self.strip_pooling1 = StripPooling(inter_channels_1, (10, 8), strip_bn, up_kwargs)
+        self.strip_pooling2 = StripPooling(inter_channels_1, (10, 8), strip_bn, up_kwargs)
 
     def init_weight(self):
         init_layer(self.pre_conv0)
@@ -2408,8 +2409,6 @@ class Wavegram_Logmel_Cnn14(nn.Module):
             a1 = do_mixup(a1, mixup_lambda)
         
         x = self.conv_block1(x, pool_size=(2, 2), pool_type='avg')
-        x = self.strip_pooling1(x)
-        x = self.strip_pooling2(x)
 
         # Concatenate Wavegram and Log mel spectrogram along the channel dimension
         x = torch.cat((x, a1), dim=1)
@@ -2419,8 +2418,9 @@ class Wavegram_Logmel_Cnn14(nn.Module):
         x = F.dropout(x, p=0.2, training=self.training)
         x = self.conv_block3(x, pool_size=(2, 2), pool_type='avg')
         x = F.dropout(x, p=0.2, training=self.training)
-        x = self.strip_pooling3(x)
-        x = self.strip_pooling4(x)
+        x = self.convsp1(x)
+        x = self.strip_pooling1(x)
+        x = self.strip_pooling2(x)
         x = self.conv_block4(x, pool_size=(2, 2), pool_type='avg')
         x = F.dropout(x, p=0.2, training=self.training)
         x = self.conv_block5(x, pool_size=(2, 2), pool_type='avg')
