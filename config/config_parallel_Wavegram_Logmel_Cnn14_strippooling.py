@@ -14,9 +14,9 @@ class TrainGlobalConfig:
     parallel=True
     k_fold=5
     num_workers = 12
-    batch_size = 32
+    batch_size = 40
     n_epochs = 1000  # n_epochs = 40
-    lr = 0.001
+    lr = 0.0001
     folder = 'output'
     verbose = True
     verbose_step = 1
