@@ -69,7 +69,7 @@ class Fitter:
                 self.val_steps += batch_size
                 waveform=torch.tensor(waveform).to(self.device).float()
                 labels=torch.tensor(labels).to(self.device).float()
-                loss_v= self.model(waveform,labels)
+                loss_v, _= self.model(waveform,labels)
                 loss_v = loss_v.mean()
                 self.writer.add_scalar('VAL_LOSS', loss_v, self.val_steps)
                 summary_loss.update(loss_v.detach().item(), batch_size)
@@ -106,7 +106,7 @@ class Fitter:
                 self.pre_x = waveform.clone()
                 self.pre_y = labels.clone()
             else:
-                loss_t = self.model(waveform,labels)
+                loss_t, _ = self.model(waveform,labels)
             loss_t = loss_t.mean() + loss_clr.mean()
             #if step+self.epoch==0:
             #    self.writer.add_graph(self.model.module, (waveform,labels))
