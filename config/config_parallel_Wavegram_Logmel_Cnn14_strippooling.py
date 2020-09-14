@@ -14,7 +14,7 @@ class TrainGlobalConfig:
     parallel=True
     k_fold=5
     num_workers = 12
-    batch_size = 32
+    batch_size = 28
     n_epochs = 1000  # n_epochs = 40
     lr = 0.001
     folder = 'output'
@@ -36,5 +36,5 @@ class TrainGlobalConfig:
         threshold_mode='abs',
         cooldown=0,
         min_lr=1e-8,
-        eps=1e-08      
+        eps=1e-08
     )

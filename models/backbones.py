@@ -2363,6 +2363,11 @@ class Wavegram_Logmel_Cnn14(nn.Module):
         
         self.init_weight()
 
+        self.fc_clr = nn.Sequential(nn.Linear(2048, 512, bias=False),
+                                    nn.BatchNorm1d(512),
+                                    nn.ReLU(inplace=True),
+                                    nn.Linear(512, 128, bias=True))
+        '''
         inter_channels_1 = 256
         strip_bn = nn.BatchNorm2d
         up_kwargs = {'mode': 'bilinear', 'align_corners': True}
@@ -2372,6 +2377,7 @@ class Wavegram_Logmel_Cnn14(nn.Module):
                                  padding=(1, 1), bias=False)
         self.strip_pooling1 = StripPooling(inter_channels_1, (10, 8), strip_bn, up_kwargs)
         self.strip_pooling2 = StripPooling(inter_channels_1, (10, 8), strip_bn, up_kwargs)
+        '''
 
     def init_weight(self):
         init_layer(self.pre_conv0)
@@ -2418,9 +2424,9 @@ class Wavegram_Logmel_Cnn14(nn.Module):
         x = F.dropout(x, p=0.2, training=self.training)
         x = self.conv_block3(x, pool_size=(2, 2), pool_type='avg')
         x = F.dropout(x, p=0.2, training=self.training)
-        x = self.convsp1(x)
-        x = self.strip_pooling1(x)
-        x = self.strip_pooling2(x)
+        #x = self.convsp1(x)
+        #x = self.strip_pooling1(x)
+        #x = self.strip_pooling2(x)
         x = self.conv_block4(x, pool_size=(2, 2), pool_type='avg')
         x = F.dropout(x, p=0.2, training=self.training)
         x = self.conv_block5(x, pool_size=(2, 2), pool_type='avg')
@@ -2428,16 +2434,19 @@ class Wavegram_Logmel_Cnn14(nn.Module):
         x = self.conv_block6(x, pool_size=(1, 1), pool_type='avg')
         x = F.dropout(x, p=0.2, training=self.training)
         x = torch.mean(x, dim=3)
-        
+
         (x1, _) = torch.max(x, dim=2)
         x2 = torch.mean(x, dim=2)
         x = x1 + x2
         x = F.dropout(x, p=0.5, training=self.training)
+        # projection head
+        z = self.fc_clr(x)
+        # classification
         x = F.relu_(self.fc1(x))
         embedding = F.dropout(x, p=0.5, training=self.training)
         clipwise_output = torch.sigmoid(self.fc_audioset(x))
         
-        output_dict = {'clipwise_output': clipwise_output, 'embedding': embedding}
+        output_dict = {'clipwise_output': clipwise_output, 'embedding': embedding, 'clr_out': z}
 
         return output_dict
 
