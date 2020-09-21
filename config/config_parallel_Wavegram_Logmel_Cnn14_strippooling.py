@@ -16,7 +16,7 @@ class TrainGlobalConfig:
     num_workers = 12
     batch_size = 28
     n_epochs = 1000  # n_epochs = 40
-    lr = 0.0001
+    lr = 0.00001
     folder = 'output'
     verbose = True
     verbose_step = 1

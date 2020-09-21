@@ -2440,7 +2440,7 @@ class Wavegram_Logmel_Cnn14(nn.Module):
         x = x1 + x2
         x = F.dropout(x, p=0.5, training=self.training)
         # projection head
-        z = self.fc_clr(x)
+        z = self.fc_clr(0.1 * x + 0.9 * x.detach())
         # classification
         x = F.relu_(self.fc1(x))
         embedding = F.dropout(x, p=0.5, training=self.training)
