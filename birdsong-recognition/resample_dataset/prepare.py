@@ -44,7 +44,7 @@ if __name__ == "__main__":
     """
     class args:
         sr=32000
-        n_splits=20
+        n_splits=5
     target_sr = args.sr
 
     train = pd.read_csv("../train.csv")
